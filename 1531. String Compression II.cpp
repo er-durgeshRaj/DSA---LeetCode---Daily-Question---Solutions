@@ -35,37 +35,50 @@
 // SOLUTION
 class Solution {
 public:
-    //int t[101][27][101][101]; //It will allocated in Stack and will give stack overflow
-    int solve(string &s, int i, int prev, int freq, int k ){
-        if(k < 0)
-            return INT_MAX;
-        
-        if(i >= s.length())
-            return 0;
-        
-        if(t[i][prev][freq][k] != -1) {
-            return t[i][prev][freq][k];
-        }
-        
-        int delete_i = solve(s, i+1, prev, freq, k-1);
-        
-        int keep_i   = 0;
-        
-        if(s[i] - 'a' == prev) {
-             int one_more_added = 0;
-             if(freq == 1 || freq == 9 || freq == 99) {
-                 one_more_added = 1;
-             }
-            keep_i = one_more_added + solve(s, i+1, prev, freq+1, k);
-        } else {
-            keep_i = 1 + solve(s, i+1, s[i]-'a', 1, k);
-        }
-        
-        return t[i][prev][freq][k] = min(delete_i, keep_i);
+    
+    int getLength(int count){
+        return count == 1 ? 1 : (count<10?2: (count<100 ? 3:4));
     }
     
+    
     int getLengthOfOptimalCompression(string s, int k) {
-        memset(t, -1, sizeof(t));
-        return solve(s, 0, 26, 0, k);
+        
+        int n = s.size();
+        
+        int dp[n+1][k+1];
+        
+        for(int i=n;i>=0;i--){
+            for(int j=0;j<=k;j++){
+                
+                // declare
+                
+                if(i == n) { dp[n][j] = 0;  continue;}
+                
+                // case 1 - delete the ith character if possible (j>0)
+                dp[i][j] = j>0 ? dp[i+1][j-1]:INT_MAX;
+                
+                // case 2-  keep the ith index.
+                
+                // find the index end point
+                
+                int possible_del = j,count=0;
+                for(int end =i;end<n&&possible_del>=0 ;end++){
+                    if(s[end] == s[i]){
+                        count++;
+                        
+                        // assumeing the block end here "aaaa"
+                        dp[i][j] = min(dp[i][j] , getLength(count)+dp[end+1][possible_del]);
+                    }
+                    else {
+                        // this character should be deleted. to make length min.
+                        possible_del--;
+                    }
+                }
+                
+                
+            }
+        }
+        
+        return dp[0][k];
     }
 };
